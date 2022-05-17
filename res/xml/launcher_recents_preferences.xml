@@ -22,6 +22,14 @@
     <PreferenceCategory
         android:title="@string/general_category_title">
 
+        <SwitchPreferenceCompat
+            android:key="pref_scroll_vibration"
+            android:title="@string/pref_scroll_vibration_title"
+            android:summary="@string/pref_scroll_vibration_summary"
+            android:defaultValue="true"
+            android:persistent="true"
+            launcher:iconSpaceReserved="false" />
+
         <com.android.launcher3.settings.preferences.CustomSeekBarPreference
             android:key="pref_recents_opacity"
             android:title="@string/background_opacity_title"
