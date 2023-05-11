@@ -40,4 +40,7 @@
     <!-- Extra bottom margin for overview TaskViews -->
     <dimen name="overview_task_extra_top_margin">8dp</dimen>
     <dimen name="overview_task_extra_bottom_margin">0dp</dimen>
+    
+    <!-- Search bar margin -->
+    <dimen name="all_apps_search_bar_margin_top">28dp</dimen>
 </resources>
