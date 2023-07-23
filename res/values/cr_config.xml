@@ -40,4 +40,7 @@
 
     <!-- Icon pack -->
     <string name="icon_pack_settings_class" translatable="false">com.android.launcher3.icons.pack.IconPackSettingsFragment</string>
+    
+    <!-- Themed Icon pack -->
+    <string name="themed_icon_pack_settings_class" translatable="false">com.android.launcher3.icons.pack.ThemeIconsSettingsFragment</string>
 </resources>
