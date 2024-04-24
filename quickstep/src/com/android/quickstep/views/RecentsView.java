@@ -18,7 +18,6 @@ package com.android.quickstep.views;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.Surface.ROTATION_0;
-import static android.view.Surface.ROTATION_180;
 import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.makeMeasureSpec;
 
@@ -36,7 +35,6 @@ import static com.android.launcher3.AbstractFloatingView.TYPE_TASK_MENU;
 import static com.android.launcher3.AbstractFloatingView.getTopOpenViewWithType;
 import static com.android.launcher3.BaseActivity.STATE_HANDLER_INVISIBILITY_FLAGS;
 import static com.android.launcher3.Flags.enableGridOnlyOverview;
-import static com.android.launcher3.LauncherAnimUtils.SCALE_PROPERTY;
 import static com.android.launcher3.LauncherAnimUtils.SUCCESS_TRANSITION_PROGRESS;
 import static com.android.launcher3.LauncherAnimUtils.VIEW_ALPHA;
 import static com.android.launcher3.LauncherState.BACKGROUND_APP;
@@ -553,8 +551,6 @@ public abstract class RecentsView<ACTIVITY_TYPE extends StatefulActivity<STATE_T
     private int mOverScrollShift = 0;
     private long mScrollLastHapticTimestamp;
 
-    private float mScrollScale = 1f;
-
     /**
      * TODO: Call reloadIdNeeded in onTaskStackChanged.
      */
@@ -853,8 +849,6 @@ public abstract class RecentsView<ACTIVITY_TYPE extends StatefulActivity<STATE_T
         }
 
         mTintingColor = getForegroundScrimDimColor(context);
-
-        mScrollScale = getResources().getFloat(R.dimen.overview_scroll_scale);
 
         // if multi-instance feature is enabled
         if (FeatureFlags.ENABLE_MULTI_INSTANCE.get()) {
@@ -3641,41 +3635,6 @@ public abstract class RecentsView<ACTIVITY_TYPE extends StatefulActivity<STATE_T
                 }
 
                 int scrollDiff = newScroll[i] - oldScroll[i] + offset;
-                if (i == dismissedIndex + 1 ||
-                        dismissedIndex == taskCount -1 && i == dismissedIndex - 1) {
-                    if (child.getScaleX() <= dismissedTaskView.getScaleX()) {
-                        anim.setFloat(child, SCALE_PROPERTY,
-                            dismissedTaskView.getScaleX(), LINEAR);
-                        if (child instanceof TaskView && mRemoteTargetHandles != null) {
-                            TaskView tv = (TaskView) child;
-                            for (RemoteTargetHandle rth : mRemoteTargetHandles) {
-                                TransformParams params = rth.getTransformParams();
-                                RemoteAnimationTargets targets = params.getTargetSet();
-                                boolean match = false;
-                                for (int id : tv.getTaskIds()) {
-                                    if (targets != null && targets.findTask(id) != null) {
-                                        match = true;
-                                    }
-                                }
-                                if (match) {
-                                    anim.addOnFrameCallback(() -> {
-                                        rth.getTaskViewSimulator().scrollScale.value =
-                                                mOrientationHandler.getPrimaryValue(
-                                                    tv.getScaleX(),
-                                                    tv.getScaleY()
-                                                );
-                                        // if scrollDiff != 0, we redraw in later(AOSP) code
-                                        if (mEnableDrawingLiveTile && scrollDiff == 0) {
-                                            redrawLiveTile();
-                                        }
-                                    });
-                                }
-                            }
-                        }
-                    } else
-                        anim.setFloat(child, SCALE_PROPERTY, 1f, LINEAR);
-                }
-
                 if (scrollDiff != 0) {
                     FloatProperty translationProperty = child instanceof TaskView
                             ? ((TaskView) child).getPrimaryDismissTranslationProperty()
@@ -4507,7 +4466,6 @@ public abstract class RecentsView<ACTIVITY_TYPE extends StatefulActivity<STATE_T
                         .setScroll(getScrollOffset()));
         setImportantForAccessibility(isModal() ? IMPORTANT_FOR_ACCESSIBILITY_NO
                 : IMPORTANT_FOR_ACCESSIBILITY_AUTO);
-        doScrollScale();
         updateLockIcon();
     }
 
@@ -6146,73 +6104,6 @@ public abstract class RecentsView<ACTIVITY_TYPE extends StatefulActivity<STATE_T
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
         super.onScrollChanged(l, t, oldl, oldt);
         dispatchScrollChanged();
-        doScrollScale();
-    }
-
-    private void doScrollScale() {
-        if (showAsGrid() || mActivity.getDeviceProfile().isTablet)
-            return;
-
-        //nick@lmo-20231004 if rotating launcher is enabled, rotation works differently
-        // There are many edge cases (going from landscape app to recents, rotating in recents etc)
-        boolean touchInLandscape = mOrientationState.getTouchRotation() != ROTATION_0
-                                && mOrientationState.getTouchRotation() != ROTATION_180;
-        boolean layoutInLandscape = mOrientationState.getRecentsActivityRotation() != ROTATION_0
-                                && mOrientationState.getRecentsActivityRotation() != ROTATION_180;
-        boolean canRotateRecents = mOrientationState.isRecentsActivityRotationAllowed();
-        int childCount = Math.min(mPageScrolls.length, getChildCount());
-        int curScroll = !canRotateRecents && touchInLandscape && !layoutInLandscape
-                             ? getScrollY() : getScrollX();
-
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            int scaleArea = child.getWidth() + mPageSpacing;
-            int childPosition = mPageScrolls[i];
-            int scrollDelta = Math.abs(curScroll - childPosition);
-            if (scrollDelta > scaleArea) {
-                child.setScaleX(mScrollScale);
-                child.setScaleY(mScrollScale);
-            } else {
-                float scale = mapToRange(scrollDelta, 0, scaleArea, 1f, mScrollScale, LINEAR);
-                child.setScaleX(scale);
-                child.setScaleY(scale);
-            }
-            if (!(child instanceof TaskView && mRemoteTargetHandles != null)) continue;
-            TaskView tv = (TaskView) child;
-            for (RemoteTargetHandle rth : mRemoteTargetHandles) {
-                TransformParams params = rth.getTransformParams();
-                RemoteAnimationTargets targets = params.getTargetSet();
-                for (int id : tv.getTaskIds()) {
-                    if (targets != null && targets.findTask(id) != null) {
-                        rth.getTaskViewSimulator().scrollScale.value =
-                                mOrientationHandler.getPrimaryValue(
-                                    tv.getScaleX(),
-                                    tv.getScaleY()
-                                );
-                    }
-                }
-            }
-        }
-    }
-
-    public float getScrollScale(RemoteTargetHandle rth) {
-        int childCount = Math.min(mPageScrolls.length, getChildCount());
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (!(child instanceof TaskView && !showAsGrid())) continue;
-            TaskView tv = (TaskView) child;
-            TransformParams params = rth.getTransformParams();
-            RemoteAnimationTargets targets = params.getTargetSet();
-            for (int id : tv.getTaskIds()) {
-                if (targets != null && targets.findTask(id) != null) {
-                    return mOrientationHandler.getPrimaryValue(
-                                tv.getScaleX(),
-                                tv.getScaleY()
-                           );
-                }
-            }
-        }
-        return 1f;
     }
 
     @Override
