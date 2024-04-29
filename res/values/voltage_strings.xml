@@ -17,7 +17,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <!-- Application name -->
-    <string name="voltage_app_name" translatable="false">Voltage Home</string>
+    <string name="voltage_app_name" translatable="false">Trebuchet Ext</string>
 
     <!-- Folder titles -->
     <string name="google_folder_title" translatable="false">Google</string>
