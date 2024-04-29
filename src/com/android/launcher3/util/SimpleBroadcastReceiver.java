@@ -46,10 +46,6 @@ public class SimpleBroadcastReceiver extends BroadcastReceiver {
         context.registerReceiver(this, getFilter(actions));
     }
 
-    public void register(Context context, int flags, String... actions) {
-        context.registerReceiver(this, getFilter(actions), flags);
-    }
-
     /**
      * Helper method to register multiple actions associated with a paction
      */
