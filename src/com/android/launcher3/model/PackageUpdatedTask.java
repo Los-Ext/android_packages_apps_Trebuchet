@@ -74,7 +74,7 @@ import java.util.stream.Collectors;
 public class PackageUpdatedTask extends BaseModelUpdateTask {
 
     // TODO(b/290090023): Set to false after root causing is done.
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final String TAG = "PackageUpdatedTask";
 
     public static final int OP_NONE = 0;
