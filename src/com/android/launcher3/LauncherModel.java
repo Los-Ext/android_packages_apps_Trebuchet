@@ -43,7 +43,6 @@ import androidx.annotation.WorkerThread;
 import com.android.launcher3.celllayout.CellPosMapper;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.icons.IconCache;
-import com.android.launcher3.lineage.trust.AppLockHelper;
 import com.android.launcher3.logging.FileLog;
 import com.android.launcher3.model.AddWorkspaceItemsTask;
 import com.android.launcher3.model.AllAppsList;
@@ -155,7 +154,7 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
             final boolean isPrimaryInstance) {
         mApp = app;
         mModelDbController = new ModelDbController(context);
-        mBgAllAppsList = new AllAppsList(iconCache, appFilter, AppLockHelper.getInstance(context));
+        mBgAllAppsList = new AllAppsList(iconCache, appFilter, app.getHiddenData());
         mModelDelegate = ModelDelegate.newInstance(context, app, mBgAllAppsList, mBgDataModel,
                 isPrimaryInstance);
     }
