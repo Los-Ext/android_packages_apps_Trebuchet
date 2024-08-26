@@ -11,8 +11,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.android.launcher3.DerpLauncher;
-import com.android.launcher3.DerpLauncherModelDelegate;
+import com.android.launcher3.ExtLauncher;
+import com.android.launcher3.ExtLauncherModelDelegate;
 
 import com.android.launcher3.celllayout.CellLayoutLayoutParams;;
 import com.android.launcher3.DeviceProfile;
@@ -47,10 +47,10 @@ public class SmartspaceViewContainer extends FrameLayout implements PluginListen
         layoutParams.setMarginStart(getResources().getDimensionPixelSize(R.dimen.enhanced_smartspace_margin_start_launcher));
         addView(mView, layoutParams);
 
-        DerpLauncher launcher = (DerpLauncher) ActivityContext.lookupContext(context);
+        ExtLauncher launcher = (ExtLauncher) ActivityContext.lookupContext(context);
         launcher.getLauncherUnlockAnimationController().setSmartspaceView(mView);
 
-        DerpLauncherModelDelegate delegate = (DerpLauncherModelDelegate) launcher.getModel().getModelDelegate();
+        ExtLauncherModelDelegate delegate = (ExtLauncherModelDelegate) launcher.getModel().getModelDelegate();
         BcSmartspaceDataProvider plugin = launcher.getSmartspacePlugin();
         plugin.registerSmartspaceEventNotifier(event -> delegate.notifySmartspaceEvent(event));
         mView.registerDataProvider(plugin);
@@ -63,7 +63,7 @@ public class SmartspaceViewContainer extends FrameLayout implements PluginListen
 
     @Override
     public void onPluginDisconnected(BcSmartspaceDataPlugin plugin) {
-        DerpLauncher launcher = (DerpLauncher) ActivityContext.lookupContext(getContext());
+        ExtLauncher launcher = (ExtLauncher) ActivityContext.lookupContext(getContext());
         mView.registerDataProvider(launcher.getSmartspacePlugin());
     }
 

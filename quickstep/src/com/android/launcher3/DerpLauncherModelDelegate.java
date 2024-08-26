@@ -29,17 +29,17 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class DerpLauncherModelDelegate extends QuickstepModelDelegate
+public class ExtLauncherModelDelegate extends QuickstepModelDelegate
     implements SmartspaceSession.OnTargetsAvailableListener {
 
-    public static final String TAG = "DerpLauncherModelDelegate";
+    public static final String TAG = "ExtLauncherModelDelegate";
 
     public final Context mContext;
     public final Deque mSmartspaceTargets = new LinkedList<List>();
 
     public SmartspaceSession mSmartspaceSession;
 
-    public DerpLauncherModelDelegate(Context context) {
+    public ExtLauncherModelDelegate(Context context) {
         super(context);
         mContext = context;
     }
