@@ -158,7 +158,6 @@ public class MemInfoView extends TextView {
                     (long) memInfo.totalMem);
             String text = String.format(mMemInfoText, availResult, totalResult);
             setText(text);
-            setTextColor(0xFFFFFFFF);
             mHandler.postDelayed(this, 1000);
         }
     }
